@@ -27,6 +27,18 @@ export type DocumentRecord = { id: string; name: string; type: string; uploadedD
 export type Message = { id: string; sender: string; body: string; sentAt: string; kind: 'team' | 'client' | 'request' };
 export type StatusEvent = { id: string; label: string; description: string; date: string; completed: boolean; current: boolean };
 export type Reviewer = { id: string; name: string; initials: string; specialization: string; openCases: number };
+export type SupportStatus = 'Open' | 'Awaiting Client' | 'Closed';
+export type SupportMessage = { id: string; sender: string; body: string; sentAt: string; role: 'client' | 'staff' };
+export type SupportThread = {
+  id: string;
+  subject: string;
+  category: 'Case question' | 'Technical help' | 'Document support';
+  caseId?: string;
+  status: SupportStatus;
+  assignedTo: string;
+  lastMessageAt: string;
+  messages: SupportMessage[];
+};
 
 export const currentUser: User = { id: 'u-100', name: 'Morgan Ellis', email: 'morgan.ellis@example.com', role: 'client' };
 
@@ -104,10 +116,51 @@ export const messagesFor = (item: CaseRecord): Message[] => [
     : []),
 ];
 
+export const seedSupportThreads: SupportThread[] = [
+  {
+    id: 'SUP-1042',
+    subject: 'Question about the documents requested',
+    category: 'Document support',
+    caseId: 'CW-23971',
+    status: 'Awaiting Client',
+    assignedTo: 'Support desk',
+    lastMessageAt: '2024-04-03T15:30:00.000Z',
+    messages: [
+      { id: 'sup-1042-1', sender: 'Morgan Ellis', body: 'I uploaded the cancellation confirmation. Is there anything else you need from me?', sentAt: '2024-04-02T14:10:00.000Z', role: 'client' },
+      { id: 'sup-1042-2', sender: 'Casework support', body: 'Thanks, Morgan. The cancellation confirmation is now attached to your case. We will let you know if the review team needs another document.', sentAt: '2024-04-03T15:30:00.000Z', role: 'staff' },
+    ],
+  },
+  {
+    id: 'SUP-1038',
+    subject: 'How do I add another case document?',
+    category: 'Technical help',
+    status: 'Closed',
+    assignedTo: 'Support desk',
+    lastMessageAt: '2024-03-28T10:20:00.000Z',
+    messages: [
+      { id: 'sup-1038-1', sender: 'Morgan Ellis', body: 'I found another statement and want to add it to my record.', sentAt: '2024-03-27T09:05:00.000Z', role: 'client' },
+      { id: 'sup-1038-2', sender: 'Casework support', body: 'Open the case from your overview, then use the Documents panel to upload it. I am closing this support thread for now.', sentAt: '2024-03-28T10:20:00.000Z', role: 'staff' },
+    ],
+  },
+];
+
 export const seedDocuments: DocumentRecord[] = [
   { id: 'doc-1', name: 'account-statement-april.pdf', type: 'PDF', uploadedDate: '2024-05-02', size: '1.8 MB', status: 'Reviewed' },
   { id: 'doc-2', name: 'email-correspondence.pdf', type: 'PDF', uploadedDate: '2024-05-02', size: '624 KB', status: 'Received' },
 ];
+
+export const loadSupportThreads = (): SupportThread[] => {
+  try {
+    const saved = localStorage.getItem('casework-support-threads');
+    return saved ? JSON.parse(saved) as SupportThread[] : seedSupportThreads;
+  } catch {
+    return seedSupportThreads;
+  }
+};
+
+export const saveSupportThreads = (items: SupportThread[]) => {
+  try { localStorage.setItem('casework-support-threads', JSON.stringify(items)); } catch { /* local-only demo */ }
+};
 
 export const loadCases = (): CaseRecord[] => {
   try {

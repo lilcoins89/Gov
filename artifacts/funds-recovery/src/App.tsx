@@ -10,6 +10,8 @@ import Dashboard from '@/pages/dashboard';
 import NewCase from '@/pages/new-case';
 import CaseDetail from '@/pages/case-detail';
 import Admin from '@/pages/admin';
+import Support from '@/pages/support';
+import AdminSupport from '@/pages/admin-support';
 import {
   Route,
   Switch,
@@ -30,7 +32,9 @@ function Router() {
          <Route path="/dashboard/cases/new" component={NewCase} />
          <Route path="/dashboard/cases/:id" component={CaseDetail} />
          <Route path="/dashboard" component={Dashboard} />
+         <Route path="/support" component={Support} />
          <Route path="/admin" component={Admin} />
+         <Route path="/admin/support" component={AdminSupport} />
         <Route component={NotFound} />
       </Switch>
     </RoutedErrorBoundary>
