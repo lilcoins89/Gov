@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Funds Recovery Platform"
+description = "A trustworthy funds recovery and case management platform for submitting cases, tracking review progress, exchanging documents, and supporting staff case operations."
+version = "1.0.0"
+id = "artifacts/funds-recovery"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 21031
+
+[services.development]
+run = "pnpm --filter @workspace/funds-recovery run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/funds-recovery", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/funds-recovery/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "21031"
+BASE_PATH = "/"
