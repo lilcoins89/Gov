@@ -12,6 +12,7 @@ import CaseDetail from '@/pages/case-detail';
 import Admin from '@/pages/admin';
 import Support from '@/pages/support';
 import AdminSupport from '@/pages/admin-support';
+import { StaffGate } from '@/components/casework/StaffGate';
 import {
   Route,
   Switch,
@@ -20,6 +21,14 @@ import {
 } from 'wouter';
 
 const queryClient = new QueryClient();
+
+function ProtectedAdmin() {
+  return <StaffGate><Admin /></StaffGate>;
+}
+
+function ProtectedAdminSupport() {
+  return <StaffGate><AdminSupport /></StaffGate>;
+}
 
 function Router() {
   return (
@@ -33,8 +42,8 @@ function Router() {
          <Route path="/dashboard/cases/:id" component={CaseDetail} />
          <Route path="/dashboard" component={Dashboard} />
          <Route path="/support" component={Support} />
-         <Route path="/admin" component={Admin} />
-         <Route path="/admin/support" component={AdminSupport} />
+         <Route path="/admin" component={ProtectedAdmin} />
+         <Route path="/admin/support" component={ProtectedAdminSupport} />
         <Route component={NotFound} />
       </Switch>
     </RoutedErrorBoundary>
