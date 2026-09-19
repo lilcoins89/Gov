@@ -41,6 +41,7 @@ export type SupportThread = {
 };
 
 export const currentUser: User = { id: 'u-100', name: 'Morgan Ellis', email: 'morgan.ellis@example.com', role: 'client' };
+export const ADMIN_EMAIL = 'emailcheck231@gmail.com';
 
 export const reviewers: Reviewer[] = [
   { id: 'r-1', name: 'Amelia Park', initials: 'AP', specialization: 'Payments & card disputes', openCases: 12 },
