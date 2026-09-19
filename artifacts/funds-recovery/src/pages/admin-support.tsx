@@ -31,7 +31,7 @@ export default function AdminSupport() {
     if (!selected || !draft.trim()) return;
     const now = new Date().toISOString();
     persist(threads.map((thread) => thread.id === selected.id
-      ? { ...thread, status: 'Awaiting Client', lastMessageAt: now, messages: [...thread.messages, { id: `staff-${Date.now()}`, sender: 'Casework support', body: draft.trim(), sentAt: now, role: 'staff' as const }] }
+      ? { ...thread, status: 'Awaiting Client', lastMessageAt: now, messages: [...thread.messages, { id: `staff-${Date.now()}`, sender: 'GOV support', body: draft.trim(), sentAt: now, role: 'staff' as const }] }
       : thread));
     setDraft('');
   };

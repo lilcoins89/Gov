@@ -90,7 +90,7 @@ export default function Landing() {
 
       <footer className="border-t border-border bg-card">
         <div className="mx-auto flex max-w-7xl flex-col gap-4 px-5 py-8 sm:flex-row sm:items-center sm:justify-between lg:px-8">
-          <p className="text-sm text-muted-foreground">© 2024 Casework. A clearer record for difficult financial situations.</p>
+          <p className="text-sm text-muted-foreground">© 2024 GOV. A clearer record for difficult financial situations.</p>
           <div className="flex gap-5 text-sm font-bold text-muted-foreground"><a href="#how-it-works" className="hover:text-foreground">How it works</a><Link href="/login" className="hover:text-foreground">Client sign in</Link></div>
         </div>
       </footer>

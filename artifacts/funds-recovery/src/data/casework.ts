@@ -100,7 +100,7 @@ export const statusEventsFor = (item: CaseRecord): StatusEvent[] => {
   const updatesStarted = ['Information Required', 'In Progress', 'Resolved', 'Closed'].includes(item.status);
   const messagesStarted = ['Information Required', 'In Progress', 'Resolved', 'Closed'].includes(item.status);
   return [
-    { id: 'submitted', label: 'Case submitted', description: 'Your case and initial details were received by Casework.', date: item.submittedDate, completed: true, current: item.status === 'Submitted' },
+    { id: 'submitted', label: 'Case submitted', description: 'Your case and initial details were received by GOV.', date: item.submittedDate, completed: true, current: item.status === 'Submitted' },
     { id: 'review-started', label: 'Review started', description: 'A specialist checks the facts, timeline, and supporting documents.', date: reviewStarted ? '2024-05-04' : '', completed: reviewStarted, current: item.status === 'Under Review' },
     { id: 'documents-received', label: 'Documents received', description: 'Supporting documents are organized alongside the case record.', date: documentsReceived ? '2024-05-09' : '', completed: documentsReceived, current: item.status === 'Information Required' },
     { id: 'review-updates', label: 'Review updates', description: 'The team shares requests, findings, and documented next steps as the review progresses.', date: updatesStarted ? '2024-05-20' : '', completed: updatesStarted, current: item.status === 'In Progress' },
@@ -110,9 +110,9 @@ export const statusEventsFor = (item: CaseRecord): StatusEvent[] => {
 };
 
 export const messagesFor = (item: CaseRecord): Message[] => [
-  { id: 'm-1', sender: item.assignedReviewer || 'Casework team', body: 'Thanks for sharing the initial record. We are reviewing the timeline and will let you know if anything else would make the case clearer.', sentAt: item.lastUpdate, kind: 'team' },
+  { id: 'm-1', sender: item.assignedReviewer || 'GOV team', body: 'Thanks for sharing the initial record. We are reviewing the timeline and will let you know if anything else would make the case clearer.', sentAt: item.lastUpdate, kind: 'team' },
   ...(item.status === 'Information Required'
-    ? [{ id: 'm-2', sender: 'Casework team', body: 'Please add the cancellation confirmation and any response from the merchant. These help us keep the review focused.', sentAt: '2024-04-02', kind: 'request' as const }]
+    ? [{ id: 'm-2', sender: 'GOV team', body: 'Please add the cancellation confirmation and any response from the merchant. These help us keep the review focused.', sentAt: '2024-04-02', kind: 'request' as const }]
     : []),
 ];
 
@@ -127,7 +127,7 @@ export const seedSupportThreads: SupportThread[] = [
     lastMessageAt: '2024-04-03T15:30:00.000Z',
     messages: [
       { id: 'sup-1042-1', sender: 'Morgan Ellis', body: 'I uploaded the cancellation confirmation. Is there anything else you need from me?', sentAt: '2024-04-02T14:10:00.000Z', role: 'client' },
-      { id: 'sup-1042-2', sender: 'Casework support', body: 'Thanks, Morgan. The cancellation confirmation is now attached to your case. We will let you know if the review team needs another document.', sentAt: '2024-04-03T15:30:00.000Z', role: 'staff' },
+      { id: 'sup-1042-2', sender: 'GOV support', body: 'Thanks, Morgan. The cancellation confirmation is now attached to your case. We will let you know if the review team needs another document.', sentAt: '2024-04-03T15:30:00.000Z', role: 'staff' },
     ],
   },
   {
@@ -139,7 +139,7 @@ export const seedSupportThreads: SupportThread[] = [
     lastMessageAt: '2024-03-28T10:20:00.000Z',
     messages: [
       { id: 'sup-1038-1', sender: 'Morgan Ellis', body: 'I found another statement and want to add it to my record.', sentAt: '2024-03-27T09:05:00.000Z', role: 'client' },
-      { id: 'sup-1038-2', sender: 'Casework support', body: 'Open the case from your overview, then use the Documents panel to upload it. I am closing this support thread for now.', sentAt: '2024-03-28T10:20:00.000Z', role: 'staff' },
+      { id: 'sup-1038-2', sender: 'GOV support', body: 'Open the case from your overview, then use the Documents panel to upload it. I am closing this support thread for now.', sentAt: '2024-03-28T10:20:00.000Z', role: 'staff' },
     ],
   },
 ];

@@ -12,12 +12,20 @@ export function CaseForm() {
   const update = (key: keyof typeof form, value: string) => setForm((current) => ({ ...current, [key]: value }));
   const submit = (event: React.FormEvent) => {
     event.preventDefault();
-    if (!form.title || !form.description || !form.institution) { setError('Add a title, institution, and clear description before continuing.'); return; }
+    const title = form.title.trim();
+    const description = form.description.trim();
+    const institution = form.institution.trim();
+    const amount = form.amountInvolved.trim() ? Number(form.amountInvolved) : 0;
+    if (!title || !description || !institution) { setError('Add a title, institution, and clear description before continuing.'); return; }
+    if (!Number.isFinite(amount) || amount < 0) { setError('Enter a valid amount of zero or more.'); return; }
     setSaving(true); setError('');
-    const id = `CW-${Math.floor(24030 + Math.random() * 500)}`;
-    const newCase: CaseRecord = { ...form, id, amountInvolved: Number(form.amountInvolved) || 0, submittedDate: new Date().toISOString().slice(0, 10), status: 'Submitted', lastUpdate: new Date().toISOString().slice(0, 10), assignedReviewer: 'Pending assignment', notes: form.additionalNotes || 'Your case is in the intake queue.' };
-    saveCases([newCase, ...loadCases()]);
-    window.setTimeout(() => setLocation(`/dashboard/cases/${id}`), 500);
+    const existing = loadCases();
+    let id = '';
+    do { id = `CW-${Math.floor(24030 + Math.random() * 700)}`; } while (existing.some((item) => item.id === id));
+    const today = new Date().toISOString().slice(0, 10);
+    const newCase: CaseRecord = { title, category: form.category, description, amountInvolved: amount, incidentDate: form.incidentDate, institution, additionalNotes: form.additionalNotes.trim() || undefined, id, submittedDate: today, status: 'Submitted', lastUpdate: today, assignedReviewer: 'Pending assignment', notes: form.additionalNotes.trim() || 'Your case is in the intake queue.' };
+    saveCases([newCase, ...existing]);
+    window.setTimeout(() => setLocation(`/dashboard/cases/${id}`), 350);
   };
   const input = 'mt-2 w-full rounded-xl border border-input bg-card px-3.5 py-3 text-sm text-foreground outline-none transition placeholder:text-muted-foreground/65 focus:border-teal-600 focus:ring-4 focus:ring-teal-100';
   return <form onSubmit={submit} className="space-y-7" data-testid="form-new-case">
