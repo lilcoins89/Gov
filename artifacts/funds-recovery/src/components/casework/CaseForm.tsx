@@ -10,7 +10,7 @@ export function CaseForm() {
   const [error, setError] = useState('');
   const [form, setForm] = useState({ title: '', category: 'Investment platform', description: '', amountInvolved: '', incidentDate: '', institution: '', additionalNotes: '' });
   const update = (key: keyof typeof form, value: string) => setForm((current) => ({ ...current, [key]: value }));
-  const submit = (event: React.FormEvent) => {
+  const submit = async (event: React.FormEvent) => {
     event.preventDefault();
     const title = form.title.trim();
     const description = form.description.trim();
@@ -19,13 +19,25 @@ export function CaseForm() {
     if (!title || !description || !institution) { setError('Add a title, institution, and clear description before continuing.'); return; }
     if (!Number.isFinite(amount) || amount < 0) { setError('Enter a valid amount of zero or more.'); return; }
     setSaving(true); setError('');
-    const existing = loadCases();
-    let id = '';
-    do { id = `CW-${Math.floor(24030 + Math.random() * 700)}`; } while (existing.some((item) => item.id === id));
-    const today = new Date().toISOString().slice(0, 10);
-    const newCase: CaseRecord = { title, category: form.category, description, amountInvolved: amount, incidentDate: form.incidentDate, institution, additionalNotes: form.additionalNotes.trim() || undefined, id, submittedDate: today, status: 'Submitted', lastUpdate: today, assignedReviewer: 'Pending assignment', notes: form.additionalNotes.trim() || 'Your case is in the intake queue.' };
-    saveCases([newCase, ...existing]);
-    window.setTimeout(() => setLocation(`/dashboard/cases/${id}`), 350);
+    try {
+      const response = await fetch('/api/cases', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-user-id': 'u-100' },
+        body: JSON.stringify({ title, category: form.category, description, amountInvolved: amount, incidentDate: form.incidentDate || undefined, institution }),
+      });
+      if (!response.ok) {
+        const payload = await response.json().catch(() => null) as { error?: string } | null;
+        throw new Error(payload?.error ?? 'Unable to save the case.');
+      }
+      const saved = await response.json() as { id: string; title: string; category: string; description: string; amountInvolved: string | number; incidentDate: string | null; institution: string; createdAt: string; status: string; assignedReviewer: string | null };
+      const submittedDate = saved.createdAt.slice(0, 10);
+      const newCase: CaseRecord = { id: saved.id, title: saved.title, category: saved.category, description: saved.description, amountInvolved: Number(saved.amountInvolved), incidentDate: saved.incidentDate ?? '', institution: saved.institution, submittedDate, status: 'Submitted', lastUpdate: submittedDate, assignedReviewer: saved.assignedReviewer ?? 'Pending assignment', notes: form.additionalNotes.trim() || 'Your case is in the intake queue.', additionalNotes: form.additionalNotes.trim() || undefined };
+      saveCases([newCase, ...loadCases().filter((item) => item.id !== newCase.id)]);
+      setLocation(`/dashboard/cases/${newCase.id}`);
+    } catch (submissionError) {
+      setError(submissionError instanceof Error ? submissionError.message : 'Unable to save the case. Please try again.');
+      setSaving(false);
+    }
   };
   const input = 'mt-2 w-full rounded-xl border border-input bg-card px-3.5 py-3 text-sm text-foreground outline-none transition placeholder:text-muted-foreground/65 focus:border-teal-600 focus:ring-4 focus:ring-teal-100';
   return <form onSubmit={submit} className="space-y-7" data-testid="form-new-case">
