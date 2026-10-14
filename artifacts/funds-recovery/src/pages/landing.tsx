@@ -91,7 +91,7 @@ export default function Landing() {
       <footer className="border-t border-border bg-card">
         <div className="mx-auto flex max-w-7xl flex-col gap-4 px-5 py-8 sm:flex-row sm:items-center sm:justify-between lg:px-8">
           <p className="text-sm text-muted-foreground">© 2024 GOV. A clearer record for difficult financial situations.</p>
-          <div className="flex gap-5 text-sm font-bold text-muted-foreground"><a href="#how-it-works" className="hover:text-foreground">How it works</a><Link href="/login" className="hover:text-foreground">Client sign in</Link></div>
+          <div className="flex flex-wrap items-center gap-5 text-sm font-bold text-muted-foreground"><a href="#how-it-works" className="hover:text-foreground">How it works</a><Link href="/login" className="hover:text-foreground">Client sign in</Link><a href="https://x.com/waysandmeansgop?s=11&t=j_tN96moh_aY6COtVn0H_g" target="_blank" rel="noreferrer" aria-label="Follow Ways and Means GOP on X" title="Follow Ways and Means GOP on X" className="inline-flex size-9 items-center justify-center rounded-full border border-border text-base font-black leading-none text-foreground transition hover:border-foreground hover:bg-foreground hover:text-background">𝕏</a></div>
         </div>
       </footer>
     </div>
