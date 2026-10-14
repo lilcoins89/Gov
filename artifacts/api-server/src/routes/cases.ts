@@ -1,6 +1,5 @@
 import { Router, type IRouter } from "express";
-import { desc, eq } from "drizzle-orm";
-import { db, caseStatusHistory, recoveryCases } from "@workspace/db";
+import { prisma } from "@workspace/db";
 
 const router: IRouter = Router();
 
@@ -8,8 +7,11 @@ router.get("/cases", async (req, res, next) => {
   try {
     const userId = String(req.header("x-user-id") ?? "").trim();
     if (!userId) { res.status(401).json({ error: "Authentication required" }); return; }
-    const rows = await db.select().from(recoveryCases).where(eq(recoveryCases.userId, userId)).orderBy(desc(recoveryCases.createdAt));
-    res.json(rows);
+    const rows = await prisma.recoveryCase.findMany({
+      where: { userId },
+      orderBy: { createdAt: "desc" },
+    });
+    res.json(rows.map((row) => ({ ...row, amountInvolved: row.amountInvolved.toFixed(2) })));
   } catch (error) { next(error); }
 });
 
@@ -29,13 +31,32 @@ router.post("/cases", async (req, res, next) => {
       return;
     }
     const id = `CW-${Date.now().toString(36).toUpperCase()}`;
-    const created = await db.transaction(async (tx) => {
-      const [row] = await tx.insert(recoveryCases).values({ id, userId, title, description, institution, category, amountInvolved: amount.toFixed(2), incidentDate, status: "Submitted" }).returning();
-      if (!row) throw new Error("Case was not created");
-      await tx.insert(caseStatusHistory).values({ id: `${id}-submitted`, caseId: id, status: "Submitted", note: "Case submitted by client", changedBy: userId });
+    const created = await prisma.$transaction(async (tx) => {
+      const row = await tx.recoveryCase.create({
+        data: {
+          id,
+          userId,
+          title,
+          description,
+          institution,
+          category,
+          amountInvolved: amount.toFixed(2),
+          incidentDate: incidentDate ? new Date(`${incidentDate}T00:00:00.000Z`) : null,
+          status: "Submitted",
+        },
+      });
+      await tx.caseStatusHistory.create({
+        data: {
+          id: `${id}-submitted`,
+          caseId: id,
+          status: "Submitted",
+          note: "Case submitted by client",
+          changedBy: userId,
+        },
+      });
       return row;
     });
-    res.status(201).json(created);
+    res.status(201).json({ ...created, amountInvolved: created.amountInvolved.toFixed(2) });
   } catch (error) { next(error); }
 });
 

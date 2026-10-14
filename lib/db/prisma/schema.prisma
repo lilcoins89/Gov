@@ -1,0 +1,117 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model RecoveryCase {
+  id                String              @id
+  userId            String              @map("user_id")
+  title             String
+  category          String
+  description       String
+  amountInvolved    Decimal             @default(0) @db.Decimal(14, 2) @map("amount_involved")
+  currency          String              @default("USD")
+  incidentDate      DateTime?           @db.Date @map("incident_date")
+  institution       String
+  status            String              @default("Submitted")
+  assignedReviewer  String?             @map("assigned_reviewer")
+  createdAt         DateTime            @default(now()) @map("created_at")
+  updatedAt         DateTime            @updatedAt @map("updated_at")
+  statusHistory     CaseStatusHistory[]
+  evidence          CaseEvidence[]
+
+  @@index([userId, createdAt])
+  @@map("recovery_cases")
+}
+
+model CaseStatusHistory {
+  id        String       @id
+  caseId   String       @map("case_id")
+  status    String
+  note      String?
+  changedBy String       @map("changed_by")
+  createdAt DateTime     @default(now()) @map("created_at")
+  case      RecoveryCase @relation(fields: [caseId], references: [id], onDelete: Cascade)
+
+  @@index([caseId, createdAt])
+  @@map("case_status_history")
+}
+
+model CaseEvidence {
+  id           String       @id
+  caseId       String       @map("case_id")
+  userId       String       @map("user_id")
+  originalName String       @map("original_name")
+  storageKey   String       @map("storage_key")
+  mimeType     String       @map("mime_type")
+  sizeBytes    Int          @map("size_bytes")
+  sha256       String?
+  createdAt    DateTime     @default(now()) @map("created_at")
+  case         RecoveryCase @relation(fields: [caseId], references: [id], onDelete: Cascade)
+
+  @@index([caseId])
+  @@index([userId, createdAt])
+  @@map("case_evidence")
+}
+
+model User {
+  id            String    @id
+  name          String
+  email         String    @unique
+  emailVerified Boolean   @default(false) @map("emailVerified")
+  image         String?
+  createdAt     DateTime  @default(now()) @map("createdAt")
+  updatedAt     DateTime  @updatedAt @map("updatedAt")
+
+  @@map("user")
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime @map("expiresAt")
+  token     String   @unique
+  createdAt DateTime @default(now()) @map("createdAt")
+  updatedAt DateTime @updatedAt @map("updatedAt")
+  ipAddress String?  @map("ipAddress")
+  userAgent String?  @map("userAgent")
+  userId    String   @map("userId")
+
+  @@index([userId])
+  @@map("session")
+}
+
+model Account {
+  id                    String   @id
+  accountId              String   @map("accountId")
+  providerId             String   @map("providerId")
+  userId                String   @map("userId")
+  accessToken           String?  @map("accessToken")
+  refreshToken          String?  @map("refreshToken")
+  idToken               String?  @map("idToken")
+  accessTokenExpiresAt  DateTime? @map("accessTokenExpiresAt")
+  refreshTokenExpiresAt DateTime? @map("refreshTokenExpiresAt")
+  scope                 String?
+  password              String?
+  createdAt             DateTime @default(now()) @map("createdAt")
+  updatedAt             DateTime @updatedAt @map("updatedAt")
+
+  @@index([userId])
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime @map("expiresAt")
+  createdAt  DateTime @default(now()) @map("createdAt")
+  updatedAt  DateTime @updatedAt @map("updatedAt")
+
+  @@index([identifier])
+  @@map("verification")
+}
+
