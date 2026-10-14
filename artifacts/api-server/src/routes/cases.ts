@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { desc, eq } from "drizzle-orm";
-import { db, recoveryCases } from "@workspace/db";
+import { db, caseStatusHistory, recoveryCases } from "@workspace/db";
 
 const router: IRouter = Router();
 
@@ -21,10 +21,20 @@ router.post("/cases", async (req, res, next) => {
     const title = String(body.title ?? "").trim();
     const description = String(body.description ?? "").trim();
     const institution = String(body.institution ?? "").trim();
+    const category = String(body.category ?? "Other financial matter").trim();
     const amount = Number(body.amountInvolved ?? 0);
-    if (!title || !description || !institution || !Number.isFinite(amount) || amount < 0) { res.status(400).json({ error: "Invalid case details" }); return; }
+    const incidentDate = body.incidentDate ? String(body.incidentDate) : null;
+    if (title.length < 3 || title.length > 160 || description.length < 10 || description.length > 10000 || institution.length < 2 || institution.length > 160 || !category || !Number.isFinite(amount) || amount < 0 || amount > 1000000000 || (incidentDate !== null && !/^\\d{4}-\\d{2}-\\d{2}$/.test(incidentDate))) {
+      res.status(400).json({ error: "Check the case details and try again." });
+      return;
+    }
     const id = `CW-${Date.now().toString(36).toUpperCase()}`;
-    const [created] = await db.insert(recoveryCases).values({ id, userId, title, description, institution, category: String(body.category ?? "Other financial matter"), amountInvolved: amount.toFixed(2), incidentDate: body.incidentDate ? String(body.incidentDate) : null, status: "Submitted" }).returning();
+    const created = await db.transaction(async (tx) => {
+      const [row] = await tx.insert(recoveryCases).values({ id, userId, title, description, institution, category, amountInvolved: amount.toFixed(2), incidentDate, status: "Submitted" }).returning();
+      if (!row) throw new Error("Case was not created");
+      await tx.insert(caseStatusHistory).values({ id: `${id}-submitted`, caseId: id, status: "Submitted", note: "Case submitted by client", changedBy: userId });
+      return row;
+    });
     res.status(201).json(created);
   } catch (error) { next(error); }
 });

@@ -1,7 +1,7 @@
 import { ArrowLeft, ArrowRight, CalendarDays, Info } from 'lucide-react';
 import { useState } from 'react';
 import { useLocation } from 'wouter';
-import { loadCases, saveCases, type CaseRecord } from '@/data/casework';
+import type { CaseRecord } from '@/data/casework';
 import { DocumentUploader } from './DocumentUploader';
 
 export function CaseForm() {
@@ -32,7 +32,6 @@ export function CaseForm() {
       const saved = await response.json() as { id: string; title: string; category: string; description: string; amountInvolved: string | number; incidentDate: string | null; institution: string; createdAt: string; status: string; assignedReviewer: string | null };
       const submittedDate = saved.createdAt.slice(0, 10);
       const newCase: CaseRecord = { id: saved.id, title: saved.title, category: saved.category, description: saved.description, amountInvolved: Number(saved.amountInvolved), incidentDate: saved.incidentDate ?? '', institution: saved.institution, submittedDate, status: 'Submitted', lastUpdate: submittedDate, assignedReviewer: saved.assignedReviewer ?? 'Pending assignment', notes: form.additionalNotes.trim() || 'Your case is in the intake queue.', additionalNotes: form.additionalNotes.trim() || undefined };
-      saveCases([newCase, ...loadCases().filter((item) => item.id !== newCase.id)]);
       setLocation(`/dashboard/cases/${newCase.id}`);
     } catch (submissionError) {
       setError(submissionError instanceof Error ? submissionError.message : 'Unable to save the case. Please try again.');
