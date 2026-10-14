@@ -1,0 +1,5 @@
+{
+  "buildCommand": "pnpm --filter @workspace/funds-recovery build",
+  "outputDirectory": "artifacts/funds-recovery/dist/public",
+  "installCommand": "pnpm install --frozen-lockfile"
+}
