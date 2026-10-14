@@ -1,4 +1,4 @@
-import { type ReactNode } from 'react';
+import { type ReactNode, useEffect } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { Toaster } from '@/components/ui/toaster';
@@ -56,6 +56,27 @@ function RoutedErrorBoundary({ children }: { children: ReactNode }) {
 }
 
 function App() {
+  useEffect(() => {
+    const existingScript = document.querySelector('script[data-tawk-chat]');
+    if (existingScript) return;
+
+    const tawkApi = window as typeof window & { Tawk_API?: Record<string, unknown>; Tawk_LoadStart?: Date };
+    tawkApi.Tawk_API = tawkApi.Tawk_API || {};
+    tawkApi.Tawk_LoadStart = new Date();
+
+    const script = document.createElement('script');
+    script.async = true;
+    script.src = 'https://embed.tawk.to/6acffda7a7cbbe34c2658d6a/default';
+    script.charset = 'UTF-8';
+    script.crossOrigin = 'anonymous';
+    script.dataset.tawkChat = 'true';
+    document.head.appendChild(script);
+
+    return () => {
+      script.remove();
+    };
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
